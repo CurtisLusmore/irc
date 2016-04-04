@@ -35,7 +35,7 @@ class IrcClient {
     }
 
     sendMessage(message) {
-        // console.log(`<<< ${message}`);
+        console.log(`<<< ${message}`);
         this.socket.write(message + '\r\n');
         return this;
     }
@@ -57,7 +57,7 @@ class IrcClient {
     }
 
     receiveMessage(message) {
-        // console.log(`>>> ${message}`);
+        console.log(`>>> ${message}`);
 
         var res = split(message, ' ', 1);
         var token = res[0];
@@ -74,7 +74,7 @@ class IrcClient {
         }
 
         var handle = this.handlers[command] || this.handlers['default'];
-        handle(prefix, command, message);
+        handle(message, prefix, command);
     }
 }
 
@@ -94,27 +94,36 @@ class Client {
         container.appendChild(form);
 
         var client = new IrcClient('chat.freenode.net', 6667)
-            .on('default', (pref, cmd, msg) => {
-                this.writeMessage(`[${pref} - ${cmd}] ${msg}`);
+            .on('default', (msg, pre, cmd) => {
+                this.writeMessage(`DEFAULT MESSAGE [${pre} - ${cmd}] ${msg}`);
             })
-            .on('PING', (pref, cmd, msg) => {
+            .on('PING', msg => {
                 client.sendCommand('PONG', msg);
             })
-            .on('NOTICE', (pref, cmd, msg) => {
+            .on('QUIT', (msg, pre) => {
+                this.writeMessage(`${pre} has quit: ${msg}`);
+            })
+            .on('NOTICE', msg => {
                 this.writeMessage(`NOTICE: ${msg}`);
             })
-            .on('JOIN', (pref, cmd, msg) => {
-                this.writeMessage(`${pref} has joined ${msg}`);
+            .on('JOIN', (msg, pre) => {
+                this.writeMessage(`${pre} has joined ${msg}`);
             })
-            .on('PRIVMSG', (pref, cmd, msg) => {
+            .on('PART', (msg, pre) => {
+                this.writeMessage(`${pre} has left ${msg}`);
+            })
+            .on('NICK', (msg, pre) => {
+                this.writeMessage(`${pre} has changed nicknames to ${msg}`);
+            })
+            .on('PRIVMSG', (msg, pre) => {
                 var res = split(msg, ' ', 1);
                 var channel = res[0];
                 var message = res[1].substring(1);
-                this.writeMessage(`${channel}: ${pref}: ${msg}`);
+                this.writeMessage(`${channel}: ${pre}: ${message}`);
             })
-            .sendCommand('PASS', 'curlpass')
-            .sendCommand('NICK', 'curlnick')
-            .sendCommand('USER', 'curluser', '0', '*', 'curl real name');
+            .sendCommand('PASS', 'curtispassword')
+            .sendCommand('NICK', 'curtis52')
+            .sendCommand('USER', 'curtis52', '0', '*', 'curtis');
 
         this.form = form;
         this.input = input;
@@ -131,11 +140,14 @@ class Client {
     }
 
     writeMessage(message) {
+        var scrollToBottom = this.output.scrollTop + this.output.clientHeight + 1 >= this.output.scrollHeight;
+
         var date = new Date().toLocaleTimeString();
         message = message.trimRight('\n').trimRight('\r');
         if (this.output.value.length > 0) this.output.value += '\n';
         this.output.value += `${date} ${message}`;
-        this.output.scrollTop = this.output.scrollHeight;
+
+        if (scrollToBottom) { this.output.scrollTop = this.output.scrollHeight; }
         return this;
     }
 }

@@ -21,6 +21,7 @@ body {
     padding: 10px;
     box-sizing: border-box;
     border: none;
+    font-family: Inconsolata;
 }
 
 .client-input {
