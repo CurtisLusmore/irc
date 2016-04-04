@@ -3,6 +3,8 @@
 const net = require('net');
 
 function split(str, sep, n) {
+    if (sep === undefined) { sep = ' '; }
+    if (n === undefined) { n = 1; }
     var items = [];
     while (n-- > 0 && str.length > 0) {
         var index = str.indexOf(sep);
@@ -59,13 +61,13 @@ class IrcClient {
     receiveMessage(message) {
         console.log(`>>> ${message}`);
 
-        var res = split(message, ' ', 1);
+        var res = split(message);
         var token = res[0];
         message = res[1];
         var prefix, command;
         if (token[0] === ':') {
             prefix = token;
-            res = split(message, ' ', 1);
+            res = split(message);
             command = res[0];
             message = res[1];
         } else {
@@ -78,11 +80,23 @@ class IrcClient {
     }
 }
 
+function makeUser(mask) {
+    var res = split(mask, '!');
+    var nick = res[0];
+    res = split(res, '@');
+    return {
+        mask: mask,
+        nick: nick,
+        user: res[0],
+        domain: res[1]
+    };
+}
+
 class Client {
     constructor(container) {
         var form = document.createElement('form');
         form.className = 'client';
-        var output = document.createElement('textarea');
+        var output = document.createElement('div');
         output.className = 'client-output';
         output.disabled = true;
         form.appendChild(output);
@@ -100,26 +114,36 @@ class Client {
             .on('PING', msg => {
                 client.sendCommand('PONG', msg);
             })
-            .on('QUIT', (msg, pre) => {
-                this.writeMessage(`${pre} has quit: ${msg}`);
-            })
             .on('NOTICE', msg => {
-                this.writeMessage(`NOTICE: ${msg}`);
+                var res = split(msg);
+                var recipient = res[0];
+                var message = res[1];
+                this.writeMessage(`NOTICE: ${message}`);
+            })
+            .on('QUIT', (msg, pre) => {
+                var user = makeUser(pre);
+                this.writeMessage(`${user.nick} has quit: ${msg}`);
             })
             .on('JOIN', (msg, pre) => {
-                this.writeMessage(`${pre} has joined ${msg}`);
+                var user = makeUser(pre);
+                this.writeMessage(`${user.nick} has joined ${msg}`);
             })
             .on('PART', (msg, pre) => {
-                this.writeMessage(`${pre} has left ${msg}`);
+                var user = makeUser(pre);
+                this.writeMessage(`${user.nick} has left ${msg}`);
             })
             .on('NICK', (msg, pre) => {
-                this.writeMessage(`${pre} has changed nicknames to ${msg}`);
+                var user = makeUser(pre);
+                this.writeMessage(`${user.nick} has changed nicknames to ${msg}`);
             })
             .on('PRIVMSG', (msg, pre) => {
-                var res = split(msg, ' ', 1);
+                var res = split(msg);
                 var channel = res[0];
-                var message = res[1].substring(1);
+                var message = res[1];
                 this.writeMessage(`${channel}: ${pre}: ${message}`);
+            })
+            .on('353', msg => {
+                this.writeMessage(`>>>${msg}<<<`);
             })
             .sendCommand('PASS', 'curtispassword')
             .sendCommand('NICK', 'curtis52')
@@ -143,9 +167,10 @@ class Client {
         var scrollToBottom = this.output.scrollTop + this.output.clientHeight + 1 >= this.output.scrollHeight;
 
         var date = new Date().toLocaleTimeString();
-        message = message.trimRight('\n').trimRight('\r');
-        if (this.output.value.length > 0) this.output.value += '\n';
-        this.output.value += `${date} ${message}`;
+        var item = document.createElement('div');
+        item.className = 'client-message';
+        item.innerText = `${date} ${message}`;
+        this.output.appendChild(item);
 
         if (scrollToBottom) { this.output.scrollTop = this.output.scrollHeight; }
         return this;
