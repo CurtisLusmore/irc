@@ -83,7 +83,7 @@ class IrcClient {
 function makeUser(mask) {
     var res = split(mask, '!');
     var nick = res[0];
-    res = split(res, '@');
+    res = split(res[1], '@');
     return {
         mask: mask,
         nick: nick,
@@ -140,7 +140,8 @@ class Client {
                 var res = split(msg);
                 var channel = res[0];
                 var message = res[1];
-                this.writeMessage(`${channel}: ${pre}: ${message}`);
+                var user = makeUser(pre);
+                this.writeMessage(`${channel}: ${user.nick}: ${message}`);
             })
             .on('353', msg => {
                 this.writeMessage(`>>>${msg}<<<`);
