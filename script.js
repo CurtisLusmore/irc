@@ -16,6 +16,40 @@ function split(str, sep, n) {
     return items;
 }
 
+function event() {
+    var subscribers = {};
+    var nextId = 0;
+    return {
+        subscribe: function (handler, predicate) {
+            var ids = [];
+            var unsubscriber = function () {
+                for (var ind in ids) {
+                    delete subscribers[ids[ind]];
+                }
+            };
+            unsubscriber.subscribe = function (handler, predicate) {
+                var id = nextId++;
+                ids.push(id);
+                subscribers[id] = {
+                    handler: handler,
+                    predicate: predicate || (() => true)
+                };
+                return this;
+            };
+            unsubscriber.subscribe(handler, predicate);
+            return unsubscriber;
+        },
+        notify: function () {
+            for (var id in subscribers) {
+                var subscriber = subscribers[id];
+                if (subscriber.predicate.apply(null, arguments)) {
+                    subscriber.handler.apply(null, arguments);
+                }
+            }
+        }
+    };
+}
+
 class IrcClient {
     constructor(host, port) {
         var socket = new net.Socket();
@@ -28,11 +62,23 @@ class IrcClient {
 
         this.socket = socket;
         this.buffer = '';
-        this.handlers = {};
+        this.recvEvent = event();
     }
 
-    on(event, fn) {
-        this.handlers[event] = fn;
+    subscribe(target, handler) {
+        var predicate;
+        switch (typeof(target)) {
+            case 'string':
+                predicate = (msg, pre, cmd) => target === cmd;
+                break;
+            case 'object':
+                predicate = (msg, pre, cmd) => target.includes(cmd);
+                break;
+            default:
+                predicate = target;
+                break;
+        }
+        this.recvEvent.subscribe(handler, predicate);
         return this;
     }
 
@@ -75,19 +121,18 @@ class IrcClient {
             command = token;
         }
 
-        var handle = this.handlers[command] || this.handlers['default'];
-        handle(message, prefix, command);
+        this.recvEvent.notify(message, prefix, command);
     }
 }
 
 function makeUser(mask) {
     var res = split(mask, '!');
-    var nick = res[0];
+    var nick = res[0].substring(1);
     res = split(res[1], '@');
     return {
         mask: mask,
         nick: nick,
-        user: res[0],
+        user: res[0].substring(1),
         domain: res[1]
     };
 }
@@ -107,45 +152,62 @@ class Client {
         form.onsubmit = () => this.sendMessage();
         container.appendChild(form);
 
-        var client = new IrcClient('chat.freenode.net', 6667)
-            .on('default', (msg, pre, cmd) => {
-                this.writeMessage(`DEFAULT MESSAGE [${pre} - ${cmd}] ${msg}`);
-            })
-            .on('PING', msg => {
+        var client = new IrcClient('chat.freenode.net', 6667);
+        client
+            .subscribe('PING', msg => {
                 client.sendCommand('PONG', msg);
             })
-            .on('NOTICE', msg => {
+            .subscribe('NOTICE', msg => {
                 var res = split(msg);
                 var recipient = res[0];
-                var message = res[1];
-                this.writeMessage(`NOTICE: ${message}`);
+                var message = res[1].substring(1);
+                this.writeMessage(message);
             })
-            .on('QUIT', (msg, pre) => {
+            // .subscribe(['001', '002', '003'], msg => {
+            //     var res = split(msg);
+            //     var message = res[1].substring(1);
+            //     this.writeMessage(message);
+            // })
+            // .subscribe(['004', '005'], msg => {
+            //     var res = split(msg);
+            //     var message = res[1];
+            //     this.writeMessage(message);
+            // })
+            // .subscribe('353', msg => {
+            //     var res = split(msg, ' ', 3);
+            //     var channel = res[2];
+            //     var message = res[3].substring(1);
+            //     this.writeMessage(`${channel}: ${message}`);
+            // })
+            .subscribe(['433', '451'], msg => {
+                var res = split(msg);
+                var message = res[1].substring(1);
+                this.writeMessage(message);
+            })
+            .subscribe('QUIT', (msg, pre) => {
                 var user = makeUser(pre);
-                this.writeMessage(`${user.nick} has quit: ${msg}`);
+                this.writeMessage(`${user.nick} has quit: ${msg.substring(1)}`);
             })
-            .on('JOIN', (msg, pre) => {
+            .subscribe('JOIN', (msg, pre) => {
                 var user = makeUser(pre);
                 this.writeMessage(`${user.nick} has joined ${msg}`);
             })
-            .on('PART', (msg, pre) => {
+            .subscribe('PART', (msg, pre) => {
                 var user = makeUser(pre);
                 this.writeMessage(`${user.nick} has left ${msg}`);
             })
-            .on('NICK', (msg, pre) => {
+            .subscribe('NICK', (msg, pre) => {
                 var user = makeUser(pre);
                 this.writeMessage(`${user.nick} has changed nicknames to ${msg}`);
             })
-            .on('PRIVMSG', (msg, pre) => {
+            .subscribe('PRIVMSG', (msg, pre) => {
                 var res = split(msg);
                 var channel = res[0];
-                var message = res[1];
+                var message = res[1].substring(1);
                 var user = makeUser(pre);
                 this.writeMessage(`${channel}: ${user.nick}: ${message}`);
-            })
-            .on('353', msg => {
-                this.writeMessage(`>>>${msg}<<<`);
-            })
+            });
+        client
             .sendCommand('PASS', 'curtispassword')
             .sendCommand('NICK', 'curtis52')
             .sendCommand('USER', 'curtis52', '0', '*', 'curtis');
@@ -165,13 +227,22 @@ class Client {
     }
 
     writeMessage(message) {
+        var elem = document.createElement('div');
+        elem.innerText = message;
+        return this.writeElement(elem);
+    }
+
+    writeElement(elem) {
         var scrollToBottom = this.output.scrollTop + this.output.clientHeight + 1 >= this.output.scrollHeight;
 
-        var date = new Date().toLocaleTimeString();
-        var item = document.createElement('div');
-        item.className = 'client-message';
-        item.innerText = `${date} ${message}`;
-        this.output.appendChild(item);
+        var container = document.createElement('div');
+        container.className = 'client-message';
+        var date = document.createElement('div');
+        date.innerText = new Date().toLocaleTimeString();
+        date.className = 'client-message-timestamp';
+        container.appendChild(date);
+        container.appendChild(elem);
+        this.output.appendChild(container);
 
         if (scrollToBottom) { this.output.scrollTop = this.output.scrollHeight; }
         return this;

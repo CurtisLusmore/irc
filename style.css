@@ -22,12 +22,16 @@ body {
     box-sizing: border-box;
     border: none;
     font-family: Inconsolata;
+    font-size: 18px;
 }
 
 .client-input {
+    width: auto;
     box-sizing: border-box;
     outline: none;
     position: relative;
+    background-color: #dddddd;
+    margin: 10px;
 }
 
 .client-output {
@@ -35,7 +39,7 @@ body {
     overflow-y: scroll;
     flex-grow: 1;
     resize: none;
-    /*white-space: nowrap;*/
+    border-bottom: 1px solid;
 }
 
 .client-message {
@@ -47,4 +51,9 @@ body {
 
 .client-message:hover {
     background-color: #eeeeee;
+}
+
+.client-message-timestamp {
+    float: left;
+    margin-right: 10px;
 }
