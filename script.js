@@ -129,11 +129,19 @@ function makeUser(mask) {
     var res = split(mask, '!');
     var nick = res[0].substring(1);
     res = split(res[1], '@');
+    var span = document.createElement('span');
+    span.innerText = nick;
+    span.className = 'tooltip';
+    var tooltip = document.createElement('span');
+    tooltip.innerText = mask;
+    tooltip.className = 'tooltiptext';
+    span.appendChild(tooltip);
     return {
         mask: mask,
         nick: nick,
         user: res[0].substring(1),
-        domain: res[1]
+        domain: res[1],
+        span: span
     };
 }
 
@@ -186,31 +194,31 @@ class Client {
             })
             .subscribe('QUIT', (msg, pre) => {
                 var user = makeUser(pre);
-                this.writeMessage(`${user.nick} has quit: ${msg.substring(1)}`);
+                this.writeMessage(user.span, ` has quit: ${msg.substring(1)}`);
             })
             .subscribe('JOIN', (msg, pre) => {
                 var user = makeUser(pre);
-                this.writeMessage(`${user.nick} has joined ${msg}`);
+                this.writeMessage(user.span, ` has joined ${msg}`);
             })
             .subscribe('PART', (msg, pre) => {
                 var user = makeUser(pre);
-                this.writeMessage(`${user.nick} has left ${msg}`);
+                this.writeMessage(user.span, ` has left ${msg}`);
             })
             .subscribe('NICK', (msg, pre) => {
                 var user = makeUser(pre);
-                this.writeMessage(`${user.nick} has changed nicknames to ${msg}`);
+                this.writeMessage(user.span, ` has changed nicknames to ${msg}`);
             })
             .subscribe('PRIVMSG', (msg, pre) => {
                 var res = split(msg);
                 var channel = res[0];
                 var message = res[1].substring(1);
                 var user = makeUser(pre);
-                this.writeMessage(`${channel}: ${user.nick}: ${message}`);
+                this.writeMessage(`${channel}: `, user.nick, `: ${message}`);
             });
         client
-            .sendCommand('PASS', 'curtispassword')
-            .sendCommand('NICK', 'curtis52')
-            .sendCommand('USER', 'curtis52', '0', '*', 'curtis');
+            .sendCommand('PASS', 'ericpassword')
+            .sendCommand('NICK', 'eric87')
+            .sendCommand('USER', 'eric87', '0', '*', 'eric');
 
         this.form = form;
         this.input = input;
@@ -226,9 +234,12 @@ class Client {
         return false;
     }
 
-    writeMessage(message) {
+    writeMessage() {
         var elem = document.createElement('div');
-        elem.innerText = message;
+        for (var ind in arguments) {
+            var argument = arguments[ind];
+            elem.appendChild(argument instanceof HTMLElement ? argument : document.createTextNode(argument));
+        }
         return this.writeElement(elem);
     }
 

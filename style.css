@@ -11,6 +11,7 @@ body {
 }
 
 .client {
+    color: #00262f;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -29,8 +30,9 @@ body {
     width: auto;
     box-sizing: border-box;
     outline: none;
+    border-radius: 6px;
     position: relative;
-    background-color: #dddddd;
+    background-color: #dfedf1;
     margin: 10px;
 }
 
@@ -43,17 +45,41 @@ body {
 }
 
 .client-message {
-    border-color: #dddddd;
-    border-style: solid;
-    border-width: 1px 0px 1px 0px;
+    border-radius: 3px;
+    padding: 3px;
+    background-color: #dfedf1;
     margin: 1px 0px 1px 0px;
 }
 
 .client-message:hover {
-    background-color: #eeeeee;
+    background-color: #fff5ec;
 }
 
 .client-message-timestamp {
     float: left;
     margin-right: 10px;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    color: #e88b30;
+}
+
+.tooltip .tooltiptext {
+    color: #00262f;
+    visibility: hidden;
+    width: auto;
+    white-space: nowrap;
+    background-color: #dfedf1;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 5px;
+    position: absolute;
+    z-index: 1;
+
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
 }
