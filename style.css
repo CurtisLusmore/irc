@@ -41,7 +41,6 @@ body {
     overflow-y: scroll;
     flex-grow: 1;
     resize: none;
-    border-bottom: 1px solid;
 }
 
 .client-message {
@@ -82,4 +81,18 @@ body {
 
 .tooltip:hover .tooltiptext {
     visibility: visible;
+}
+
+.client-output::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+    background-color: #dfedf1;
+}
+
+.client-output::-webkit-scrollbar-thumb {
+    background-color: #579eaf;
+}
+
+.client-output::-webkit-scrollbar-thumb:hover {
+    background-color: #217b90;
 }

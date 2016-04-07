@@ -156,6 +156,7 @@ class Client {
         var input = document.createElement('input');
         input.className = 'client-input';
         input.autofocus = true;
+        input.placeholder = 'JOIN #channel';
         form.appendChild(input);
         form.onsubmit = () => this.sendMessage();
         container.appendChild(form);
@@ -171,25 +172,24 @@ class Client {
                 var message = res[1].substring(1);
                 this.writeMessage(message);
             })
-            // .subscribe(['001', '002', '003'], msg => {
+            // .subscribe(['001', '002', '003'], msg => { // Welcome
             //     var res = split(msg);
             //     var message = res[1].substring(1);
             //     this.writeMessage(message);
             // })
-            // .subscribe(['004', '005'], msg => {
+            // .subscribe(['004', '005'], msg => { // info
             //     var res = split(msg);
             //     var message = res[1];
             //     this.writeMessage(message);
             // })
-            // .subscribe('353', msg => {
-            //     var res = split(msg, ' ', 3);
-            //     var channel = res[2];
-            //     var message = res[3].substring(1);
-            //     this.writeMessage(`${channel}: ${message}`);
-            // })
-            .subscribe(['433', '451'], msg => {
+            .subscribe(['353', '366'], msg => { // NAMES
+                var res = split(msg, ' ', 2);
+                var message = res[2];
+                this.writeMessage(message);
+            })
+            .subscribe(['433', '451'], msg => { // ERR_NICKNAMEINUSE
                 var res = split(msg);
-                var message = res[1].substring(1);
+                var message = res[1];
                 this.writeMessage(message);
             })
             .subscribe('QUIT', (msg, pre) => {
@@ -216,9 +216,9 @@ class Client {
                 this.writeMessage(`${channel}: `, user.nick, `: ${message}`);
             });
         client
-            .sendCommand('PASS', 'ericpassword')
-            .sendCommand('NICK', 'eric87')
-            .sendCommand('USER', 'eric87', '0', '*', 'eric');
+            .sendCommand('PASS', 'curtispassword')
+            .sendCommand('NICK', 'curtis52')
+            .sendCommand('USER', 'curtis52', '0', '*', 'curtis');
 
         this.form = form;
         this.input = input;
