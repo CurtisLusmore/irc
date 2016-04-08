@@ -187,7 +187,7 @@ class Client {
                 var message = res[2];
                 this.writeMessage(message);
             })
-            .subscribe(['433', '451'], msg => { // ERR_NICKNAMEINUSE
+            .subscribe(['432', '433', '451'], msg => { // ERR_NICKNAMEINUSE
                 var res = split(msg);
                 var message = res[1];
                 this.writeMessage(message);
@@ -213,7 +213,7 @@ class Client {
                 var channel = res[0];
                 var message = res[1].substring(1);
                 var user = makeUser(pre);
-                this.writeMessage(`${channel}: `, user.nick, `: ${message}`);
+                this.writeMessage(`${channel}: `, user.span, `: ${message}`);
             });
         client
             .sendCommand('PASS', 'curtispassword')
