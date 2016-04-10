@@ -36,6 +36,10 @@ body {
     margin: 10px;
 }
 
+.client-input::-webkit-input-placeholder {
+    color: #217b90;
+}
+
 .client-output {
     height: 100%;
     overflow-y: scroll;

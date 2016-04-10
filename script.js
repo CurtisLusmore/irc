@@ -192,6 +192,10 @@ class Client {
                 var message = res[1];
                 this.writeMessage(message);
             })
+            .subscribe(['704', '705', '706'], msg => { // HELP
+                var res = split(msg, ' ', 2);
+                this.writeMessage(res[2]);
+            })
             .subscribe('QUIT', (msg, pre) => {
                 var user = makeUser(pre);
                 this.writeMessage(user.span, ` has quit: ${msg.substring(1)}`);
@@ -235,6 +239,9 @@ class Client {
     }
 
     writeMessage() {
+        if (arguments.length === 1 && arguments[0] === '') {
+            console.log('empty');
+        }
         var elem = document.createElement('div');
         for (var ind in arguments) {
             var argument = arguments[ind];
