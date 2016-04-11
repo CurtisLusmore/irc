@@ -194,7 +194,8 @@ class Client {
             })
             .subscribe(['704', '705', '706'], msg => { // HELP
                 var res = split(msg, ' ', 2);
-                this.writeMessage(res[2]);
+                var msg = res[2].substring(1).trim();
+                if (msg !== '') this.writeMessage(msg);
             })
             .subscribe('QUIT', (msg, pre) => {
                 var user = makeUser(pre);
