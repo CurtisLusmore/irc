@@ -2,6 +2,13 @@
 
 const net = require('net');
 
+/**
+ * Split a string with the given separator at most n times.
+ * @param {str} The string to split.
+ * @param {sep} The separator to split on.
+ * @param {n} The maximum number of splits to make.
+ * @return An array of substrings.
+ */
 function split(str, sep, n) {
     if (sep === undefined) { sep = ' '; }
     if (n === undefined) { n = 1; }
@@ -9,13 +16,28 @@ function split(str, sep, n) {
     while (n-- > 0 && str.length > 0) {
         var index = str.indexOf(sep);
         var item = str.substring(0, index);
-        str = str.substring(index+1);
+        str = str.substring(index+sep.length);
         items.push(item);
     }
     if (str.length > 0) items.push(str);
     return items;
 }
 
+/**
+ * Create a new event. The event has a subscribe method and a notify method.
+ *
+ * The subscribe method returns a callable which will unsubscribe when called,
+ * and can also have its subscribe method called to make further subscriptions.
+ * The subscribe methods take two function handles, the first is the callback
+ * which is called when the event is notified, the second is a predicate which
+ * must return true if the callback is to be invoked. The second argument is
+ * optional, if missing the callback is always called.
+ *
+ * The notify method takes any number of arguments and notifies all subscribers
+ * by calling the predicate and callback functions with the supplied arguments.
+ *
+ * @return A new event.
+ */
 function event() {
     var subscribers = {};
     var nextId = 0;
@@ -50,7 +72,16 @@ function event() {
     };
 }
 
+/**
+ * A class representing an IRC client. Allows sending and receiving of messages
+ * to/from an IRC server.
+ */
 class IrcClient {
+    /**
+     * Create a new IRC client.
+     * @param {host} The hostname of the server to connect to.
+     * @param {port} The port number of the server to connect to.
+     */
     constructor(host, port) {
         var socket = new net.Socket();
         socket.setEncoding('ascii');
@@ -65,6 +96,16 @@ class IrcClient {
         this.recvEvent = event();
     }
 
+    /**
+     * Subscribe to messages received by the IRC server.
+     * @param {target} The target message/s to subscribe to. If a string,
+     *     matches messages of the supplied command. If a list, matches
+     *     messages of any of the supplied commands. If a predicate, matches
+     *     messages whose command satisfies the predicate.
+     * @param {handler} The callback function. Receives the message, prefix and
+     *     command.
+     * @return A callable to unsubscribe.
+     */
     subscribe(target, handler) {
         var predicate;
         switch (typeof(target)) {
@@ -82,12 +123,21 @@ class IrcClient {
         return this;
     }
 
+    /**
+     * Send a message to the IRC server.
+     * @param {message} The message to send.
+     */
     sendMessage(message) {
         console.log(`<<< ${message}`);
         this.socket.write(message + '\r\n');
         return this;
     }
 
+    /**
+     * Send a command to the IRC server, by joining the array of arguments
+     * with spaces.
+     * @param {arguments} The arguments that make up the command.
+     */
     sendCommand() {
         var args = Array.apply(null, arguments);
         this.sendMessage(args.join(' '));
@@ -125,6 +175,12 @@ class IrcClient {
     }
 }
 
+/**
+ * Parse the given user mask to create a user object.
+ * @param {mask} The user mask.
+ * @return A user object containing the mask, nick, user, domain and a HTML
+ *     span.
+ */
 function makeUser(mask) {
     var res = split(mask, '!');
     var nick = res[0].substring(1);
