@@ -201,7 +201,14 @@ function makeUser(mask) {
     };
 }
 
+/**
+ * Class representing a form-backed IRC client.
+ */
 class Client {
+    /**
+     * Create a new client and the form that provides its input and output.
+     * @param {container} The container element to add the form to.
+     */
     constructor(container) {
         var form = document.createElement('form');
         form.className = 'client';
@@ -287,6 +294,10 @@ class Client {
         this.client = client;
     }
 
+    /**
+     * Send a message to the IRC server.
+     * @param {arguments} The components of the message to send.
+     */
     sendMessage() {
         var message = this.input.value;
         this.input.value = '';
@@ -295,6 +306,11 @@ class Client {
         return false;
     }
 
+    /**
+     * Write a message to the form output. Adds all arguments to a container
+     * element which represents a single message.
+     * @param {arguments} The components of the message.
+     */
     writeMessage() {
         if (arguments.length === 1 && arguments[0] === '') {
             console.log('empty');
@@ -307,6 +323,10 @@ class Client {
         return this.writeElement(elem);
     }
 
+    /**
+     * Write a HTML element to the form output.
+     * @param {elem} A HTML element.
+     */
     writeElement(elem) {
         var scrollToBottom = this.output.scrollTop + this.output.clientHeight + 1 >= this.output.scrollHeight;
 
