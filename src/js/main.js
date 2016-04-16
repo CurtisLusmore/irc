@@ -16,10 +16,10 @@ app.on('ready', function() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    icon: 'icon.png',
+    icon: 'src/icon.png',
     'auto-hide-menu-bar': true
   });
-  mainWindow.loadURL(`file://${__dirname}/index.html`);
+  mainWindow.loadURL(`file://${__dirname}/../index.html`);
   mainWindow.on('closed', function() {
     mainWindow = null;
   });
