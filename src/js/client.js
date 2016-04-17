@@ -343,3 +343,7 @@ class Client {
         return this;
     }
 }
+
+(function() {
+    new Client(document.getElementById('app'));
+}());
