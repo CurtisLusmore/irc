@@ -15,7 +15,7 @@
     "type": "git",
     "url": "https://github.com/CurtisLusmore/irc.git"
   },
-  "main": "./src/js/main.js",
+  "main": "main.js",
   "dependencies": {
     "electron-prebuilt": "^0.36.9",
     "babel-loader": "^6.2.0",

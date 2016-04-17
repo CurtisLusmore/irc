@@ -5,12 +5,12 @@ var path = require('path');
 module.exports = {
   context: path.join(__dirname, "src"),
   devtool: debug ? "inline-sourcemap" : null,
-  entry: "./js/client.js",
+  entry: "./js/app.js",
   target: "electron",
   module: {
     loaders: [
       {
-        test: /\.js?$/,
+        test: /\.jsx?$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         query: {
@@ -22,7 +22,7 @@ module.exports = {
   },
   output: {
     path: __dirname + "/src/",
-    filename: "./js/client.min.js"
+    filename: "./js/app.min.js"
   },
   plugins: debug ? [] : [
     new webpack.optimize.DedupePlugin(),

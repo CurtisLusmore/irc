@@ -19,7 +19,7 @@ app.on('ready', function() {
     icon: 'src/icon.png',
     'auto-hide-menu-bar': true
   });
-  mainWindow.loadURL(`file://${__dirname}/../index.html`);
+  mainWindow.loadURL(`file://${__dirname}/src/index.html`);
   mainWindow.on('closed', function() {
     mainWindow = null;
   });
