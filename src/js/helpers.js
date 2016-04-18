@@ -5,7 +5,7 @@
  * @param {n} The maximum number of splits to make.
  * @return An array of substrings.
  */
-function split(str, sep, n) {
+export function split(str, sep, n) {
     if (sep === undefined) { sep = ' '; }
     if (n === undefined) { n = 1; }
     var items = [];
@@ -34,7 +34,7 @@ function split(str, sep, n) {
  *
  * @return A new event.
  */
-function event() {
+export function event() {
     var subscribers = {};
     var nextId = 0;
     return {
@@ -74,7 +74,7 @@ function event() {
  * @return A user object containing the mask, nick, user, domain and a HTML
  *     span.
  */
-function makeUser(mask) {
+export function makeUser(mask) {
     var res = split(mask, '!');
     var nick = res[0].substring(1);
     res = split(res[1], '@');

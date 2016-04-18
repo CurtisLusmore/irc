@@ -1,23 +1,23 @@
-import IrcClient from "./IrcClient.js";
-import {makeUser, split} from "../helpers.js";
+import IrcClient from './IrcClient.js';
+import {makeUser, split} from '../helpers.js';
 
 
 /**
  * Class representing a form-backed IRC client.
  */
-class Client {
+export default class Client {
     /**
      * Create a new client and the form that provides its input and output.
      * @param {container} The container element to add the form to.
      */
     constructor(container) {
-        var form = document.createElement('form');
+        const form = document.createElement('form');
         form.className = 'client';
-        var output = document.createElement('div');
+        const output = document.createElement('div');
         output.className = 'client-output';
         output.disabled = true;
         form.appendChild(output);
-        var input = document.createElement('input');
+        const input = document.createElement('input');
         input.className = 'client-input';
         input.autofocus = true;
         input.placeholder = 'JOIN #channel';
@@ -25,7 +25,7 @@ class Client {
         form.onsubmit = () => this.sendMessage();
         container.appendChild(form);
 
-        var client = new IrcClient('chat.freenode.net', 6667);
+        const client = new IrcClient('chat.freenode.net', 6667);
         client
             .subscribe('PING', msg => {
                 client.sendCommand('PONG', msg);
@@ -144,7 +144,3 @@ class Client {
         return this;
     }
 }
-
-(function() {
-    new Client(document.getElementById('app'));
-}());

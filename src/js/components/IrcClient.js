@@ -1,4 +1,4 @@
-import Socket from 'net';
+import {Socket} from 'net';
 import {event, split} from '../helpers.js';
 
 
@@ -6,14 +6,14 @@ import {event, split} from '../helpers.js';
  * A class representing an IRC client. Allows sending and receiving of messages
  * to/from an IRC server.
  */
-class IrcClient {
+export default class IrcClient {
     /**
      * Create a new IRC client.
      * @param {host} The hostname of the server to connect to.
      * @param {port} The port number of the server to connect to.
      */
     constructor(host, port) {
-        var socket = new Socket();
+        const socket = new Socket();
         socket.setEncoding('ascii');
         socket.connect({
             host: host,
