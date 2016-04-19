@@ -16,6 +16,7 @@ export default class Client extends React.Component {
     constructor() {
         super();
         this.state = {
+            input: '',
             messages: []
         };
         this.client = new IrcClient('chat.freenode.net', 6667);
@@ -81,6 +82,7 @@ export default class Client extends React.Component {
             .sendCommand('PASS', 'curtispassword')
             .sendCommand('NICK', 'curtis52')
             .sendCommand('USER', 'curtis52', '0', '*', 'curtis');
+        this.messageKey = 0;
     }
 
     /**
@@ -88,9 +90,12 @@ export default class Client extends React.Component {
      * @param {arguments} The components of the message to send.
      */
     sendMessage(ev) {
-        const input = ev.target.input;
-        const message = input.value;
-        input.value = '';
+        console.log(this);
+        ev.preventDefault();
+        const message = this.state.input;
+        this.setState({
+            input: ''
+        });
 
         this.client.sendMessage(message);
         return false;
@@ -107,19 +112,31 @@ export default class Client extends React.Component {
             msg += arguments[ind];
         }
 
+        const key = this.messageKey++;
         this.setState({
-            messages: this.state.messages.concat([<Message contents={msg} />])
+            messages: this.state.messages.concat([<Message contents={msg} key={key}/>])
         });
         return this;
     }
 
+    handleInputChange(ev) {
+        this.setState({
+            input: ev.target.value
+        });
+    }
+
     render() {
         return (
-            <form class="client" onsubmit="this.sendMessage();">
+            <form class="client" onSubmit={this.sendMessage.bind(this)}>
                 <div class="client-output" disabled>
                     {this.state.messages}
                 </div>
-                <input class="client-input" placeholder="JOIN #channel" autofocus />
+                <input
+                    class="client-input"
+                    value={this.state.input}
+                    onChange={this.handleInputChange.bind(this)}
+                    placeholder="JOIN #channel"
+                    autofocus />
             </form>
         );
     }
