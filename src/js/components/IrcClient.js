@@ -87,15 +87,11 @@ export default class IrcClient {
     receiveMessage(message) {
         console.log(`>>> ${message}`);
 
-        var res = split(message);
-        var token = res[0];
-        message = res[1];
+        var [token, message] = split(message);
         var prefix, command;
         if (token[0] === ':') {
             prefix = token;
-            res = split(message);
-            command = res[0];
-            message = res[1];
+            [command, message] = split(message);
         } else {
             prefix = null;
             command = token;

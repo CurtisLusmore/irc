@@ -2,7 +2,9 @@ import React from 'react';
 
 import IrcClient from './IrcClient.js';
 import Message from './Message.js';
-import {makeUser, split} from '../helpers.js';
+import Text from './Text.js';
+import User from './User.js';
+import {split} from '../helpers.js';
 
 
 /**
@@ -19,16 +21,17 @@ export default class Client extends React.Component {
             input: '',
             messages: []
         };
-        this.client = new IrcClient('chat.freenode.net', 6667);
-        this.client
+        var client = new IrcClient('chat.freenode.net', 6667);
+        client
             .subscribe('PING', msg => {
                 client.sendCommand('PONG', msg);
             })
             .subscribe('NOTICE', msg => {
                 var res = split(msg);
-                var recipient = res[0];
-                var message = res[1].substring(1);
-                this.writeMessage(message);
+                var [recipient, message] = split(msg);
+                // var recipient = res[0];
+                // var message = res[1].substring(1);
+                this.writeMessage(message.substring(1));
             })
             // .subscribe(['001', '002', '003'], msg => { // Welcome
             //     var res = split(msg);
@@ -41,47 +44,45 @@ export default class Client extends React.Component {
             //     this.writeMessage(message);
             // })
             .subscribe(['353', '366'], msg => { // NAMES
-                var res = split(msg, ' ', 2);
-                var message = res[2];
+                var [recipient, _, message] = split(msg, ' ', 2);
                 this.writeMessage(message);
             })
             .subscribe(['432', '433', '451'], msg => { // ERR_NICKNAMEINUSE
-                var res = split(msg);
-                var message = res[1];
+                var [recipient, message] = split(msg);
                 this.writeMessage(message);
             })
             .subscribe(['704', '705', '706'], msg => { // HELP
-                var res = split(msg, ' ', 2);
-                var msg = res[2].substring(1).trim();
-                if (msg !== '') this.writeMessage(msg);
+                var [recipient, _, message] = split(msg, ' ', 2);
+                message = message.substring(1).trim();
+                if (message !== '') this.writeMessage(message);
             })
             .subscribe('QUIT', (msg, pre) => {
-                var user = makeUser(pre);
-                this.writeMessage(user.nick, ` has quit: ${msg.substring(1)}`);
+                var user = ind => <User mask={pre} key={ind} />;
+                this.writeMessage(user, ' has quit: ', msg.substring(1));
             })
             .subscribe('JOIN', (msg, pre) => {
-                var user = makeUser(pre);
-                this.writeMessage(user.nick, ` has joined ${msg}`);
+                var user = ind => <User mask={pre} key={ind} />;
+                this.writeMessage(user, ' has joined ', msg);
             })
             .subscribe('PART', (msg, pre) => {
-                var user = makeUser(pre);
-                this.writeMessage(user.nick, ` has left ${msg}`);
+                var user = ind => <User mask={pre} key={ind} />;
+                this.writeMessage(user, ' has left ', msg);
             })
             .subscribe('NICK', (msg, pre) => {
-                var user = makeUser(pre);
-                this.writeMessage(user.nick, ` has changed nicknames to ${msg}`);
+                var user = ind => <User mask={pre} key={ind} />;
+                this.writeMessage(user, ' has changed nicknames to ', msg.substring(1));
             })
             .subscribe('PRIVMSG', (msg, pre) => {
-                var res = split(msg);
-                var channel = res[0];
-                var message = res[1].substring(1);
-                var user = makeUser(pre);
-                this.writeMessage(`${channel}: `, user.nick, `: ${message}`);
+                var [channel, message] = split(msg);
+                message = message.substring(1);
+                var user = ind => <User mask={pre} key={ind} />;
+                this.writeMessage(channel, ': ', user, ': ', message);
             });
-        this.client
+        client
             .sendCommand('PASS', 'curtispassword')
             .sendCommand('NICK', 'curtis52')
             .sendCommand('USER', 'curtis52', '0', '*', 'curtis');
+        this.client = client;
         this.messageKey = 0;
     }
 
@@ -90,7 +91,6 @@ export default class Client extends React.Component {
      * @param {arguments} The components of the message to send.
      */
     sendMessage(ev) {
-        console.log(this);
         ev.preventDefault();
         const message = this.state.input;
         this.setState({
@@ -107,14 +107,11 @@ export default class Client extends React.Component {
      * @param {arguments} The components of the message.
      */
     writeMessage() {
-        var msg = '';
-        for (var ind in arguments) {
-            msg += arguments[ind];
-        }
-
+        var args = Array.apply(null, arguments)
+            .map((arg, ind) => typeof(arg) === 'string' ? <Text contents={arg} key={ind} /> : arg(ind));
         const key = this.messageKey++;
         this.setState({
-            messages: this.state.messages.concat([<Message contents={msg} key={key}/>])
+            messages: this.state.messages.concat([<Message contents={args} key={key} />])
         });
         return this;
     }

@@ -67,29 +67,3 @@ export function event() {
         }
     };
 }
-
-/**
- * Parse the given user mask to create a user object.
- * @param {mask} The user mask.
- * @return A user object containing the mask, nick, user, domain and a HTML
- *     span.
- */
-export function makeUser(mask) {
-    var res = split(mask, '!');
-    var nick = res[0].substring(1);
-    res = split(res[1], '@');
-    var span = document.createElement('span');
-    span.innerText = nick;
-    span.className = 'tooltip';
-    var tooltip = document.createElement('span');
-    tooltip.innerText = mask;
-    tooltip.className = 'tooltiptext';
-    span.appendChild(tooltip);
-    return {
-        mask: mask,
-        nick: nick,
-        user: res[0].substring(1),
-        domain: res[1],
-        span: span
-    };
-}
