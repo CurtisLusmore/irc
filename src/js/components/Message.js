@@ -1,5 +1,8 @@
 import React from 'react';
 
+/**
+ * Class representing a message received from an IRC server.
+ */
 export default class Message extends React.Component {
     constructor() {
         super();

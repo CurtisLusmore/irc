@@ -4,6 +4,10 @@ import Text from './Text.js';
 import {split} from '../helpers.js';
 
 
+/**
+ * Class representing a user on an IRC server.
+ * @prop {mask} The user mask.
+ */
 export default class User extends React.Component {
     constructor(props) {
         super(props);

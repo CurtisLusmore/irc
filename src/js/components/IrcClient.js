@@ -69,8 +69,8 @@ export default class IrcClient {
      * @param {arguments} The arguments that make up the command.
      */
     sendCommand() {
-        var args = Array.apply(null, arguments);
-        this.sendMessage(args.join(' '));
+        const message = Array.apply(null, arguments).join(' ');
+        this.sendMessage(message);
         return this;
     }
 

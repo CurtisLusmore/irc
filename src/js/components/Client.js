@@ -21,16 +21,14 @@ export default class Client extends React.Component {
             input: '',
             messages: []
         };
-        var client = new IrcClient('chat.freenode.net', 6667);
+        const client = new IrcClient('chat.freenode.net', 6667);
         client
             .subscribe('PING', msg => {
                 client.sendCommand('PONG', msg);
             })
             .subscribe('NOTICE', msg => {
-                var res = split(msg);
-                var [recipient, message] = split(msg);
-                // var recipient = res[0];
-                // var message = res[1].substring(1);
+                const res = split(msg);
+                const [recipient, message] = split(msg);
                 this.writeMessage(message.substring(1));
             })
             // .subscribe(['001', '002', '003'], msg => { // Welcome
@@ -44,11 +42,11 @@ export default class Client extends React.Component {
             //     this.writeMessage(message);
             // })
             .subscribe(['353', '366'], msg => { // NAMES
-                var [recipient, _, message] = split(msg, ' ', 2);
+                const [recipient, _, message] = split(msg, ' ', 2);
                 this.writeMessage(message);
             })
             .subscribe(['432', '433', '451'], msg => { // ERR_NICKNAMEINUSE
-                var [recipient, message] = split(msg);
+                const [recipient, message] = split(msg);
                 this.writeMessage(message);
             })
             .subscribe(['704', '705', '706'], msg => { // HELP
@@ -57,25 +55,25 @@ export default class Client extends React.Component {
                 if (message !== '') this.writeMessage(message);
             })
             .subscribe('QUIT', (msg, pre) => {
-                var user = ind => <User mask={pre} key={ind} />;
+                const user = ind => <User mask={pre} key={ind} />;
                 this.writeMessage(user, ' has quit: ', msg.substring(1));
             })
             .subscribe('JOIN', (msg, pre) => {
-                var user = ind => <User mask={pre} key={ind} />;
+                const user = ind => <User mask={pre} key={ind} />;
                 this.writeMessage(user, ' has joined ', msg);
             })
             .subscribe('PART', (msg, pre) => {
-                var user = ind => <User mask={pre} key={ind} />;
+                const user = ind => <User mask={pre} key={ind} />;
                 this.writeMessage(user, ' has left ', msg);
             })
             .subscribe('NICK', (msg, pre) => {
-                var user = ind => <User mask={pre} key={ind} />;
+                const user = ind => <User mask={pre} key={ind} />;
                 this.writeMessage(user, ' has changed nicknames to ', msg.substring(1));
             })
             .subscribe('PRIVMSG', (msg, pre) => {
                 var [channel, message] = split(msg);
                 message = message.substring(1);
-                var user = ind => <User mask={pre} key={ind} />;
+                const user = ind => <User mask={pre} key={ind} />;
                 this.writeMessage(channel, ': ', user, ': ', message);
             });
         client
@@ -107,7 +105,7 @@ export default class Client extends React.Component {
      * @param {arguments} The components of the message.
      */
     writeMessage() {
-        var args = Array.apply(null, arguments)
+        const args = Array.apply(null, arguments)
             .map((arg, ind) => typeof(arg) === 'string' ? <Text contents={arg} key={ind} /> : arg(ind));
         const key = this.messageKey++;
         this.setState({
