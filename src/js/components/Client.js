@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 import IrcClient from './IrcClient.js';
 import Message from './Message.js';
@@ -19,7 +20,8 @@ export default class Client extends React.Component {
         super();
         this.state = {
             input: '',
-            messages: []
+            messages: [],
+            scrolledToBottom: true
         };
         const client = new IrcClient('chat.freenode.net', 6667);
         client
@@ -120,10 +122,18 @@ export default class Client extends React.Component {
         });
     }
 
+    scrollOutput(ev) {
+        const target = ev.target;
+        this.setState({
+            scrolledToBottom: target.scrollTop + target.clientHeight + 1 >= target.scrollHeight
+        });
+
+    }
+
     render() {
         return (
             <form class="client" onSubmit={this.sendMessage.bind(this)}>
-                <div class="client-output" disabled>
+                <div class="client-output" onScroll={this.scrollOutput.bind(this)} disabled ref="output">
                     {this.state.messages}
                 </div>
                 <input
@@ -134,5 +144,12 @@ export default class Client extends React.Component {
                     autofocus />
             </form>
         );
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        const node = this.refs.output;
+        if (this.state.scrolledToBottom && document.hasFocus()) {
+            node.scrollTop = node.scrollHeight;
+        }
     }
 }
