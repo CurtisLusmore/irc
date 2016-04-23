@@ -5,13 +5,11 @@
  * @param {n} The maximum number of splits to make.
  * @return An array of substrings.
  */
-export function split(str, sep, n) {
-    if (sep === undefined) { sep = ' '; }
-    if (n === undefined) { n = 1; }
-    var items = [];
+export function split(str, sep=' ', n=1) {
+    const items = [];
     while (n-- > 0 && str.length > 0) {
-        var index = str.indexOf(sep);
-        var item = str.substring(0, index);
+        let index = str.indexOf(sep);
+        let item = str.substring(0, index);
         str = str.substring(index+sep.length);
         items.push(item);
     }
@@ -35,22 +33,22 @@ export function split(str, sep, n) {
  * @return A new event.
  */
 export function event() {
-    var subscribers = {};
+    const subscribers = {};
     var nextId = 0;
     return {
-        subscribe: function (handler, predicate) {
-            var ids = [];
+        subscribe: function (handler, predicate=()=>true) {
+            const ids = [];
             var unsubscriber = function () {
-                for (var ind in ids) {
+                for (const ind in ids) {
                     delete subscribers[ids[ind]];
                 }
             };
             unsubscriber.subscribe = function (handler, predicate) {
-                var id = nextId++;
+                const id = nextId++;
                 ids.push(id);
                 subscribers[id] = {
                     handler: handler,
-                    predicate: predicate || (() => true)
+                    predicate: predicate
                 };
                 return this;
             };
@@ -58,8 +56,8 @@ export function event() {
             return unsubscriber;
         },
         notify: function () {
-            for (var id in subscribers) {
-                var subscriber = subscribers[id];
+            for (const id in subscribers) {
+                const subscriber = subscribers[id];
                 if (subscriber.predicate.apply(null, arguments)) {
                     subscriber.handler.apply(null, arguments);
                 }

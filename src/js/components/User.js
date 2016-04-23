@@ -11,7 +11,7 @@ import {split} from '../helpers.js';
 export default class User extends React.Component {
     constructor(props) {
         super(props);
-        var mask = props.mask;
+        const mask = props.mask;
         var [nick, res] = split(mask, '!');
         nick = nick.substring(1);
         var [user, domain] = split(res[1], '@');

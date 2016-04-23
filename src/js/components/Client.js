@@ -86,10 +86,6 @@ export default class Client extends React.Component {
         this.messageKey = 0;
     }
 
-    /**
-     * Send a message to the IRC server.
-     * @param {arguments} The components of the message to send.
-     */
     sendMessage(ev) {
         ev.preventDefault();
         const message = this.state.input;
@@ -101,17 +97,12 @@ export default class Client extends React.Component {
         return false;
     }
 
-    /**
-     * Write a message to the form output. Adds all arguments to a container
-     * element which represents a single message.
-     * @param {arguments} The components of the message.
-     */
-    writeMessage() {
-        const args = Array.apply(null, arguments)
+    writeMessage(...contents) {
+        contents = contents
             .map((arg, ind) => typeof(arg) === 'string' ? <Text contents={arg} key={ind} /> : arg(ind));
         const key = this.messageKey++;
         this.setState({
-            messages: this.state.messages.concat([<Message contents={args} key={key} />])
+            messages: this.state.messages.concat([<Message contents={contents} key={key} />])
         });
         return this;
     }

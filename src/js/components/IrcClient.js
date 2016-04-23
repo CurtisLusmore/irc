@@ -66,10 +66,10 @@ export default class IrcClient {
     /**
      * Send a command to the IRC server, by joining the array of arguments
      * with spaces.
-     * @param {arguments} The arguments that make up the command.
+     * @param {parts} The parts that make up the command.
      */
-    sendCommand() {
-        const message = Array.apply(null, arguments).join(' ');
+    sendCommand(...parts) {
+        const message = parts.join(' ');
         this.sendMessage(message);
         return this;
     }
